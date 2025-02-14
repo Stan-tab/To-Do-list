@@ -61,6 +61,74 @@ ul {
     flex: 3;
     padding-left: calc(2rem - 1vw);
     padding-right: 2rem;
+    position: relative;
+}
+
+.mainBox > .inputField {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: hsl(0, 0%, 95%);
+    box-shadow: 1px 2px 3px 2px hsl(0, 0%, 70%);
+    width: clamp(250px, 40%, 345px);
+    padding-left: 1rem;
+    padding-top: 0.5rem;
+    border-radius: 10px;
+}
+
+.inputField img{
+    margin-left: calc(90% - 0.5vw);
+}
+
+.inputField img:first-child + p{
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.inputField input{
+    border: 1px solid hsl(0, 0%, 70%);
+    border-radius: 3px;
+    text-align: center;
+}
+
+.inputField > label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.inputField > label input{
+    height: 1.5rem;
+    margin-top: 5px;
+}
+
+.timeInput {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 0 1rem;
+    gap: 0.5rem;
+    + button {
+        transform: translate(-50%);
+        margin: 10px 50%;
+        width: 6rem;
+        border: 1px solid hsl(0, 0%, 70%);
+        border-radius: 3px;
+    }
+}
+
+.timeInput > * {
+    height: 2rem;
+}
+
+.timeInput input:first-child{
+    flex: 1;
+}
+
+.timeInput input+input{
+    flex: 2;
 }
 
 label > p {
