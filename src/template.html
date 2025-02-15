@@ -7,30 +7,32 @@
 </head>
 <body>
     <nav>
-        <ul class="base">
-            <li class="addTask"><img src="../assets/plus-circle.svg" alt="Adder">
-                <p>Add task</p>
-            </li>
-            <li class="search">
-                <img src="../assets/search.svg" alt="loop">
-                <p>Search</p>
-            </li>
-            <li class="today">
-                <img src="../assets/calendar.svg" alt="Today">
-                <p>Today</p>
-            </li>
-        </ul>
-        <div class="custom">
-            <ul class="myProjects">
-                <p>My projects</p>
-                <li>Sleep</li>
-                <li>Eat</li>
-                <li>walk</li>
+        <div>
+            <ul class="base">
+                <li class="addTask"><img src="../assets/plus-circle.svg" alt="Adder">
+                    <p>Add group</p>
+                </li>
+                <li class="search">
+                    <img src="../assets/search.svg" alt="loop">
+                    <p>Search</p>
+                </li>
+                <li class="today">
+                    <img src="../assets/calendar.svg" alt="Today">
+                    <p>Today</p>
+                </li>
             </ul>
+            <div class="custom">
+                <ul class="myProjects">
+                    <p>My projects</p>
+                    <li>Sleep</li>
+                    <li>Eat</li>
+                    <li>walk</li>
+                </ul>
+            </div>
         </div>
     </nav>
-    <div class="mainBox">
-        <div class="inputField">
+    <div class="forField f1">
+        <div class="inputField card">
             <img src="../assets/x.svg" alt="exit">
             <p>What is your task</p>
             <label>
@@ -43,6 +45,16 @@
             </div>
             <button class="apply">Apply</button>
         </div>
+    </div>
+    <div class="forField f2">
+        <div class="card">
+            <img src="../assets/x.svg" alt="exit">
+            <p>Add group name</p>
+            <input type="text">
+            <button class="apply">Apply</button>
+        </div>
+    </div>
+    <div class="mainBox">
         <header>
             <img src="../assets/filter.svg" alt="filter" class="filter">
             <h1>Today</h1>
