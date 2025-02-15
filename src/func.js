@@ -1,7 +1,7 @@
 import positive from "../assets/plus.svg"
 
 const groups = [];
-const tasks = [];
+const mainTasks = [];
 
 class main{
     changable = {
@@ -28,13 +28,29 @@ class main{
         });
         this.inputing.button.addEventListener("click", () => {
             if (!this.inputing.input.value) return;
-            groups.push(DOMinate.DOMNavEdit(this.inputing.input.value));
+            this.new = DOMinate.DOMNavEdit(this.inputing.input.value);
+            groups.push(this.new);
+            mainTasks.push(DOMinate.DOMToDoEdit(this.new.element.classList));
             console.log(groups);
-            DOMinate.DOMToDoEdit(this.inputing.input.value);
+            console.log(mainTasks);
             this.inputing.input.value = "";
             this.field.style.display = "none";
         })
     })()
+
+    static giveClass(ul, value, place) {
+        let check = false;
+        let num = "";
+        place.forEach(el => {
+            if(value == el.element.classList) {
+                check = true
+            }
+        });
+        if (check) {
+            num = Math.round(Math.random() * 56);
+        }
+        ul.classList = value + num;
+    }
 }
 
 class DOMinate {
@@ -46,9 +62,10 @@ class DOMinate {
         const newGroup = document.createElement("ul");
         const para = document.createElement("p");
         para.textContent = value;
+        main.giveClass(newGroup, value, groups);
         newGroup.appendChild(para);
         customProj.appendChild(newGroup);
-        return {name: para.textContent, element: newGroup, title: para};
+        return {title: para, element: newGroup};
     }
 
     static DOMToDoEdit(value) {
@@ -58,6 +75,7 @@ class DOMinate {
         const tasks = document.createElement("ul");
         const task = document.createElement("li");
         const img = document.createElement("img");
+        tasks.classList = value;
         img.src = positive;
         img.alt = "positive";
         toDo.appendChild(para);
@@ -65,6 +83,39 @@ class DOMinate {
         tasks.appendChild(task);
         task.appendChild(img);
         task.appendChild(document.createTextNode("Add task"));
+        task.addEventListener("click", () => {
+            DOMinate.CallInput();
+        });
+        return {title: para, parent: tasks, lastChild: task};
+    }
+
+    static CallInput() {
+        const calledInput = document.querySelector(".f1");
+        const button = document.querySelector(".f1 .apply");
+        const img = document.querySelector(".f1 > .inputField.card > img");
+
+        calledInput.style.display = "flex";
+
+        img.addEventListener("click", () => {
+            remove();
+        });
+        button.addEventListener("click", () => {
+            const inputText = document.querySelector(".f1 > .inputField.card > label > input");
+            const timeInput = document.querySelectorAll(".timeInput > *");
+            const impInput = document.querySelector(".impInp > label input:checked");
+            if(!inputText.value || !timeInput[0].value || !timeInput[1].value) console.log();
+            
+            remove();
+        });
+
+        function remove() {
+            document.querySelector(".f1 > .inputField.card > label > input").value = "";
+            [...document.querySelectorAll(".timeInput > *")].forEach(el => {
+                el.value = "";
+            });
+            document.querySelector(".impInp > label input").checked = true;
+            calledInput.style.display = "none";
+        }
     }
 }
 
