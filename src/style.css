@@ -151,6 +151,57 @@ ul {
     flex: 2;
 }
 
+.impInp{
+    display: flex;
+    flex-wrap: wrap;
+    padding-right: 5px;
+}
+
+.impInp  > * {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    &> input{
+        margin: 0;
+        margin-right: 6px;
+    }
+    &> input::after {
+        width: 15px;
+        height: 15px;
+        border: 1px solid hsl(0, 0%, 70%) !important;
+        border-radius: 15px;
+        top: -2px;
+        left: -1px;
+        position: relative;
+        background-color: hsl(0, 0%, 90%);
+        content: '';
+        display: inline-block;
+        visibility: visible;
+        border: 2px solid white;
+    }
+    &> input:checked::after{
+        background-color: hsl(0, 0%, 75%);
+    }
+    & > .mid::after{
+        background-color: hsl(51, 100%, 90%);
+        border: 1px solid hsl(39, 93%, 72%) !important;
+    }
+    & > .imp::after{
+        background-color: hsl(0, 100%, 90%);
+        border: 1px solid hsl(0, 100%, 60%) !important;
+    }
+    & > .mid:checked:after {
+        background-color: hsl(51, 100%, 60%);
+    }
+    & > .imp:checked:after {
+        background-color: hsl(0, 100%, 65%);
+    }
+    &>p{
+        display: inline;
+        margin-left: 0;
+    }
+}
+
 .f2 > .card > p{
     margin-top: 5px;
 }
@@ -170,6 +221,12 @@ label .timeManage {
     font-size: 0.75rem;
     font-weight: lighter;
     color: green;
+}
+
+.mainBox p ,
+.mainBox h1 {
+    max-width: 50vw;
+    word-wrap: break-word;
 }
 
 .todos > p {
