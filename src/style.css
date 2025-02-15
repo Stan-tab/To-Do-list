@@ -26,10 +26,6 @@ nav {
     min-width: 112px;
 }
 
-nav > div {
-    position: fixed;
-}
-
 nav .base > li{
     display: flex;
     margin-top: 0.6rem;
@@ -48,11 +44,15 @@ nav .base > li{
     margin-bottom: 1rem;
     font-weight: bolder;
     font-size: 1.15rem;
+    max-width: clamp(112px, 16vw, 180px);
+    word-break: break-all;
 }
 
 .custom > ul > li{
     padding-left: 1rem;
     margin: 6px 0;
+    max-width: clamp(96px, 14vw, 160px);
+    word-break: break-all;
 }
 
 ul>li{
