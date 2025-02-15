@@ -19,6 +19,8 @@ class main{
     field = document.querySelector(".f2");
 
     addListeners = (() => {
+        const toDos = document.querySelector(".todos");
+        toDos.textContent = "Seems you are free now. Add some tasks";
         this.inpCall.addEventListener("click", () => {
             this.field.style.display = "flex";
         });
@@ -30,7 +32,7 @@ class main{
             if (!this.inputing.input.value) return;
             this.new = DOMinate.DOMNavEdit(this.inputing.input.value);
             groups.push(this.new);
-            mainTasks.push(DOMinate.DOMToDoEdit(this.new.element.classList));
+            mainTasks.push(DOMinate.DOMToDoEdit(this.inputing.input.value, this.new.element.classList));
             console.log(groups);
             console.log(mainTasks);
             this.inputing.input.value = "";
@@ -68,10 +70,11 @@ class DOMinate {
         return {title: para, element: newGroup};
     }
 
-    static DOMToDoEdit(value) {
+    static DOMToDoEdit(text, value) {
         const toDo = document.querySelector(".todos");
         const para = document.createElement("p");
-        para.textContent = value;
+        toDo.textContent = "";
+        para.textContent = text;
         const tasks = document.createElement("ul");
         const task = document.createElement("li");
         const img = document.createElement("img");
@@ -83,10 +86,11 @@ class DOMinate {
         tasks.appendChild(task);
         task.appendChild(img);
         task.appendChild(document.createTextNode("Add task"));
-        task.addEventListener("click", () => {
+        task.addEventListener("click", (e) => {
+            this.pushed = e.target;
             DOMinate.CallInput();
         });
-        return {title: para, parent: tasks, lastChild: task};
+        return {title: para, parent: tasks, lastChild: task, amount: 0};
     }
 
     static CallInput() {
@@ -102,9 +106,8 @@ class DOMinate {
         button.addEventListener("click", () => {
             const inputText = document.querySelector(".f1 > .inputField.card > label > input");
             const timeInput = document.querySelectorAll(".timeInput > *");
-            const impInput = document.querySelector(".impInp > label input:checked");
-            if(!inputText.value || !timeInput[0].value || !timeInput[1].value) console.log();
-            
+            if(!inputText.value || !timeInput[0].value || !timeInput[1].value) return;
+            DOMinate.taskCreator(inputText.value, timeInput[0].value, timeInput[1].value);
             remove();
         });
 
@@ -116,6 +119,46 @@ class DOMinate {
             document.querySelector(".impInp > label input").checked = true;
             calledInput.style.display = "none";
         }
+    }
+
+    static taskCreator(tittle, hourBased, monthBased) {
+        let nums;
+        const children = this.pushed;
+        const parent = children.parentNode;
+        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const impInput = document.querySelector(".impInp > label input:checked");
+        const li = document.createElement("li");
+        const date = new Date(monthBased);
+        const input = document.createElement("input");
+        const div = document.createElement("div");
+        const para1 = document.createElement("p");
+        const para2 = document.createElement("p");
+        mainTasks.forEach(e => {
+            e.parent.classList == parent.classList ? nums = mainTasks.indexOf(e) : console.log("uwi");
+        })
+        const count = "td" + mainTasks[nums].amount;
+
+        para1.textContent = tittle;
+        para2.textContent = `${hourBased} ${daysOfWeek[date.getDay()]}`;
+        para2.classList = "timeManage";
+
+        if (impInput.classList == "mid") {
+            input.classList = "medium";
+        } else if (impInput.classList == "imp") {
+            input.classList = "important";
+        };
+
+        input.type = "checkbox";
+        input.id = count;
+        div.classList = count;
+
+        li.appendChild(input);
+        li.appendChild(div);
+        div.appendChild(para1);
+        div.appendChild(para2);
+
+        parent.insertBefore(li, children);
+        mainTasks[nums].amount += 1;
     }
 }
 

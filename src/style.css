@@ -211,13 +211,13 @@ ul {
     display: none;
 }
 
-label > p {
+div > p {
     margin: 0;
     margin-left: 5px;
     font-weight: 500;
 }
 
-label .timeManage {
+div .timeManage {
     font-size: 0.75rem;
     font-weight: lighter;
     color: green;
