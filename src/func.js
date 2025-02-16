@@ -13,10 +13,13 @@ class main{
         input: document.querySelector(".f2 input"),
         img: document.querySelector(".f2 img"),
         button: document.querySelector(".f2 button"),
+        button1: document.querySelector(".f1 .apply"),
+        img1: document.querySelector(".f1 > .inputField.card > img"),
     }
 
     inpCall = document.querySelector(".addGroup");
     field = document.querySelector(".f2");
+    calledInput = document.querySelector(".f1");
 
     addListeners = (() => {
         const toDos = document.querySelector(".todos");
@@ -30,15 +33,42 @@ class main{
         });
         this.inputing.button.addEventListener("click", () => {
             if (!this.inputing.input.value) return;
-            this.new = DOMinate.DOMNavEdit(this.inputing.input.value);
-            groups.push(this.new);
-            mainTasks.push(DOMinate.DOMToDoEdit(this.inputing.input.value, this.new.element.classList));
+            this.navObjs = DOMinate.DOMNavEdit(this.inputing.input.value);
+            this.toDoObj = DOMinate.DOMToDoEdit(this.inputing.input.value, this.navObjs.element.classList);
+
+            groups.push(this.navObjs);
+            mainTasks.push(this.toDoObj);
             console.log(groups);
             console.log(mainTasks);
             this.inputing.input.value = "";
             this.field.style.display = "none";
+
+            this.toDoObj.lastChild.addEventListener("click", (e) => {
+                this.calledInput.style.display = "flex";
+                this.pushed = e.target;
+            })
+        });
+        this.inputing.button1.addEventListener("click", () => {
+            const inputText = document.querySelector(".f1 > .inputField.card > label > input");
+            const timeInput = document.querySelectorAll(".timeInput > *");
+            if(!inputText.value || !timeInput[0].value || !timeInput[1].value) return;
+            DOMinate.taskCreator(inputText.value, timeInput[0].value, timeInput[1].value, this.pushed);
+            this.remove()
+        });
+        this.inputing.img1.addEventListener("click", () => {
+            this.remove();
         })
     })()
+
+    remove() {
+        document.querySelector(".f1 > .inputField.card > label > input").value = "";
+        [...document.querySelectorAll(".timeInput > *")].forEach(el => {
+            el.value = "";
+        });
+        document.querySelector(".impInp > label input").checked = true;
+        this.calledInput.style.display = "none";
+    };
+
 
     static giveClass(ul, value, place) {
         let check = false;
@@ -53,12 +83,16 @@ class main{
         }
         ul.classList = value + num;
     }
+    static separator(hourTime, monthTime) {
+        hourTime = hourTime.split(":");
+        monthTime = monthTime.split("-");
+        return {hourTime, monthTime};
+    }
 }
 
-class DOMinate {
-    toDo = document.querySelector(".todos");
-    customProj = document.querySelector(".custom");
 
+
+class DOMinate {
     static DOMNavEdit(value) {
         const customProj = document.querySelector(".custom");
         const newGroup = document.createElement("ul");
@@ -73,7 +107,7 @@ class DOMinate {
     static DOMToDoEdit(text, value) {
         const toDo = document.querySelector(".todos");
         const para = document.createElement("p");
-        toDo.textContent = "";
+        if(toDo.textContent == "Seems you are free now. Add some tasks") toDo.textContent = "";
         para.textContent = text;
         const tasks = document.createElement("ul");
         const task = document.createElement("li");
@@ -86,49 +120,17 @@ class DOMinate {
         tasks.appendChild(task);
         task.appendChild(img);
         task.appendChild(document.createTextNode("Add task"));
-        task.addEventListener("click", (e) => {
-            this.pushed = e.target;
-            DOMinate.CallInput();
-        });
-        return {title: para, parent: tasks, lastChild: task, amount: 0};
+        return {title: para, parent: tasks, lastChild: task, amount: 0, childs:[]};
     }
 
-    static CallInput() {
-        const calledInput = document.querySelector(".f1");
-        const button = document.querySelector(".f1 .apply");
-        const img = document.querySelector(".f1 > .inputField.card > img");
-
-        calledInput.style.display = "flex";
-
-        img.addEventListener("click", () => {
-            remove();
-        });
-        button.addEventListener("click", () => {
-            const inputText = document.querySelector(".f1 > .inputField.card > label > input");
-            const timeInput = document.querySelectorAll(".timeInput > *");
-            if(!inputText.value || !timeInput[0].value || !timeInput[1].value) return;
-            DOMinate.taskCreator(inputText.value, timeInput[0].value, timeInput[1].value);
-            remove();
-        });
-
-        function remove() {
-            document.querySelector(".f1 > .inputField.card > label > input").value = "";
-            [...document.querySelectorAll(".timeInput > *")].forEach(el => {
-                el.value = "";
-            });
-            document.querySelector(".impInp > label input").checked = true;
-            calledInput.style.display = "none";
-        }
-    }
-
-    static taskCreator(tittle, hourBased, monthBased) {
+    static taskCreator(tittle, hourBased, monthBased, children) {
         let nums;
-        const children = this.pushed;
         const parent = children.parentNode;
+        const time = main.separator(hourBased, monthBased);
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         const impInput = document.querySelector(".impInp > label input:checked");
         const li = document.createElement("li");
-        const date = new Date(monthBased);
+        const date = new Date(time.monthTime[0], time.monthTime[1], time.monthTime[2], time.hourTime[0], time.hourTime[1]);
         const input = document.createElement("input");
         const div = document.createElement("div");
         const para1 = document.createElement("p");
@@ -137,6 +139,11 @@ class DOMinate {
             e.parent.classList == parent.classList ? nums = mainTasks.indexOf(e) : console.log("uwi");
         })
         const count = "td" + mainTasks[nums].amount;
+        const navLi = document.createElement("li");
+        navLi.textContent = tittle;
+        navLi.classList = count;
+        const nav = document.querySelector(`nav .${parent.classList}`);
+        nav.appendChild(navLi);
 
         para1.textContent = tittle;
         para2.textContent = `${hourBased} ${daysOfWeek[date.getDay()]}`;
@@ -159,6 +166,10 @@ class DOMinate {
 
         parent.insertBefore(li, children);
         mainTasks[nums].amount += 1;
+        mainTasks[nums].childs.push({name: tittle, date: date, importance: input.classList, id: input.id, checked: false});
+
+        const value = JSON.stringify({groups, mainTasks});
+        localStorage.setItem("user", value);
     }
 }
 
