@@ -1,6 +1,6 @@
 import positive from "../assets/plus.svg"
 
-const groups = [];
+const toJson = [];
 const mainTasks = [];
 
 class main{
@@ -32,22 +32,22 @@ class main{
             this.inputing.input.value = "";
         });
         this.inputing.button.addEventListener("click", () => {
-            if (!this.inputing.input.value) return;
+            const not = [":", ";", "'", "\"", "\\", "|", "&"];
+            if (!this.inputing.input.value || not.some(el => this.inputing.input.value.includes(el))) return;
             this.navObjs = DOMinate.DOMNavEdit(this.inputing.input.value);
             this.toDoObj = DOMinate.DOMToDoEdit(this.inputing.input.value, this.navObjs.element.classList);
 
-            groups.push(this.navObjs);
             mainTasks.push(this.toDoObj);
-            console.log(groups);
             console.log(mainTasks);
             this.inputing.input.value = "";
             this.field.style.display = "none";
 
             this.toDoObj.lastChild.addEventListener("click", (e) => {
                 this.calledInput.style.display = "flex";
-                this.pushed = e.target;
+                e.target.nodeName == "IMG" ? this.pushed = e.target.parentNode : this.pushed = e.target;
             })
         });
+
         this.inputing.button1.addEventListener("click", () => {
             const inputText = document.querySelector(".f1 > .inputField.card > label > input");
             const timeInput = document.querySelectorAll(".timeInput > *");
@@ -74,19 +74,20 @@ class main{
         let check = false;
         let num = "";
         place.forEach(el => {
-            if(value == el.element.classList) {
-                check = true
-            }
+            if(value == el.parent.classList) check = true;
         });
-        if (check) {
-            num = Math.round(Math.random() * 56);
-        }
-        ul.classList = value + num;
+        if (check) num = Math.round(Math.random() * 56);
+        ul.classList = `${value}${num}`;
     }
+
     static separator(hourTime, monthTime) {
         hourTime = hourTime.split(":");
         monthTime = monthTime.split("-");
         return {hourTime, monthTime};
+    }
+
+    static jsonize(n) {
+        console.log(mainTasks[n].title)
     }
 }
 
@@ -98,7 +99,7 @@ class DOMinate {
         const newGroup = document.createElement("ul");
         const para = document.createElement("p");
         para.textContent = value;
-        main.giveClass(newGroup, value, groups);
+        main.giveClass(newGroup, value, mainTasks);
         newGroup.appendChild(para);
         customProj.appendChild(newGroup);
         return {title: para, element: newGroup};
@@ -168,8 +169,7 @@ class DOMinate {
         mainTasks[nums].amount += 1;
         mainTasks[nums].childs.push({name: tittle, date: date, importance: input.classList, id: input.id, checked: false});
 
-        const value = JSON.stringify({groups, mainTasks});
-        localStorage.setItem("user", value);
+        main.jsonize(nums);
     }
 }
 
