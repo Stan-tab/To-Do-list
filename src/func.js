@@ -21,9 +21,34 @@ class main{
     field = document.querySelector(".f2");
     calledInput = document.querySelector(".f1");
 
+    recognize = (() => {
+        if (!localStorage.getItem("data")) return;
+        const data = JSON.parse(localStorage.getItem("data"));
+        data.forEach(e => {
+            DOMinate.DOMNavEdit(e.title, true, e.class);
+            DOMinate.DOMToDoEdit(e.title, e.class);
+        });
+        mainTasks.forEach(e => {
+            toJson.push({
+                title: e.title.textContent,
+                class: e.parent.classList[0],
+                childs: e.childs, 
+            })
+        });
+    })();
+
     addListeners = (() => {
         const toDos = document.querySelector(".todos");
-        toDos.textContent = "Seems you are free now. Add some tasks";
+        if (toDos.textContent == false) {
+            toDos.textContent = "Seems you are free now. Add some tasks"
+        } else {
+            mainTasks.forEach(e => {
+                e.lastChild.addEventListener("click", (e) => {
+                    this.calledInput.style.display = "flex";
+                    e.target.nodeName == "IMG" ? this.pushed = e.target.parentNode : this.pushed = e.target;
+                })
+            });
+        };
         this.inpCall.addEventListener("click", () => {
             this.field.style.display = "flex";
         });
@@ -32,15 +57,18 @@ class main{
             this.inputing.input.value = "";
         });
         this.inputing.button.addEventListener("click", () => {
-            const not = [":", ";", "'", "\"", "\\", "|", "&"];
-            if (!this.inputing.input.value || not.some(el => this.inputing.input.value.includes(el))) return;
+            const not = [":", ";", "'", "\"", "\\", "|", "&", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
+            if (this.inputing.input.value == false || not.some(el => this.inputing.input.value.includes(el))) return;
             this.navObjs = DOMinate.DOMNavEdit(this.inputing.input.value);
             this.toDoObj = DOMinate.DOMToDoEdit(this.inputing.input.value, this.navObjs.element.classList);
 
-            mainTasks.push(this.toDoObj);
+            toJson.push({title: this.toDoObj.title.textContent, class: this.toDoObj.parent.classList[0], childs: this.toDoObj.childs})
             console.log(mainTasks);
+
             this.inputing.input.value = "";
             this.field.style.display = "none";
+
+            main.jsonize()
 
             this.toDoObj.lastChild.addEventListener("click", (e) => {
                 this.calledInput.style.display = "flex";
@@ -59,6 +87,7 @@ class main{
             this.remove();
         })
     })()
+
 
     remove() {
         document.querySelector(".f1 > .inputField.card > label > input").value = "";
@@ -86,20 +115,20 @@ class main{
         return {hourTime, monthTime};
     }
 
-    static jsonize(n) {
-        console.log(mainTasks[n].title)
+    static jsonize() {
+        localStorage.setItem("data", JSON.stringify(toJson));
     }
 }
 
 
 
 class DOMinate {
-    static DOMNavEdit(value) {
+    static DOMNavEdit(value, first = false, cls) {
         const customProj = document.querySelector(".custom");
         const newGroup = document.createElement("ul");
         const para = document.createElement("p");
         para.textContent = value;
-        main.giveClass(newGroup, value, mainTasks);
+        !first ? main.giveClass(newGroup, value, mainTasks) : newGroup.classList = cls;
         newGroup.appendChild(para);
         customProj.appendChild(newGroup);
         return {title: para, element: newGroup};
@@ -121,6 +150,7 @@ class DOMinate {
         tasks.appendChild(task);
         task.appendChild(img);
         task.appendChild(document.createTextNode("Add task"));
+        mainTasks.push({title: para, parent: tasks, lastChild: task, amount: 0, childs:[]});
         return {title: para, parent: tasks, lastChild: task, amount: 0, childs:[]};
     }
 
@@ -167,9 +197,15 @@ class DOMinate {
 
         parent.insertBefore(li, children);
         mainTasks[nums].amount += 1;
-        mainTasks[nums].childs.push({name: tittle, date: date, importance: input.classList, id: input.id, checked: false});
+        mainTasks[nums].childs.push({name: tittle, date: date, importance: input.classList[0], id: input.id, checked: false});
 
-        main.jsonize(nums);
+        toJson.push({
+            title: mainTasks[nums].title.textContent,
+            class: mainTasks[nums].parent.classList[0],
+            childs: mainTasks[nums].childs, 
+        })
+
+        main.jsonize();
     }
 }
 
