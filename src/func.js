@@ -25,16 +25,20 @@ class main{
         if (!localStorage.getItem("data")) return;
         const data = JSON.parse(localStorage.getItem("data"));
         data.forEach(e => {
-            DOMinate.DOMNavEdit(e.title, true, e.class);
-            DOMinate.DOMToDoEdit(e.title, e.class);
+            const navVal = DOMinate.DOMNavEdit(e.tittle);
+            const toDoObj = DOMinate.DOMToDoEdit(e.tittle, navVal.element.classList[0]);
+
+            toJson.push({tittle: toDoObj.tittle.textContent, childs: toDoObj.childs});
+            mainTasks.push({tittle: toDoObj.tittle, parent: toDoObj.parent, lastChild: toDoObj.lastChild, childs: toDoObj.childs});
         });
-        mainTasks.forEach(e => {
-            toJson.push({
-                title: e.title.textContent,
-                class: e.parent.classList[0],
-                childs: e.childs, 
+        data.forEach(e => {
+            if(e.childs==0) return;
+            e.childs.forEach(el => {
+                const toDoTask = DOMinate.taskToDo(el.name, new Date(el.date), mainTasks[data.indexOf(e)].lastChild, el.importance);
+                DOMinate.taskNav(el.name, mainTasks[data.indexOf(e)].lastChild, toDoTask.class);
+                mainTasks[data.indexOf(e)].childs.push(toDoTask.child);
             })
-        });
+        })
     })();
 
     addListeners = (() => {
@@ -46,7 +50,7 @@ class main{
                 e.lastChild.addEventListener("click", (e) => {
                     this.calledInput.style.display = "flex";
                     e.target.nodeName == "IMG" ? this.pushed = e.target.parentNode : this.pushed = e.target;
-                })
+                });
             });
         };
         this.inpCall.addEventListener("click", () => {
@@ -57,18 +61,19 @@ class main{
             this.inputing.input.value = "";
         });
         this.inputing.button.addEventListener("click", () => {
-            const not = [":", ";", "'", "\"", "\\", "|", "&", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
-            if (this.inputing.input.value == false || not.some(el => this.inputing.input.value.includes(el))) return;
+            if (this.inputing.input.value == false) return;
             this.navObjs = DOMinate.DOMNavEdit(this.inputing.input.value);
             this.toDoObj = DOMinate.DOMToDoEdit(this.inputing.input.value, this.navObjs.element.classList);
 
-            toJson.push({title: this.toDoObj.title.textContent, class: this.toDoObj.parent.classList[0], childs: this.toDoObj.childs})
+            toJson.push({tittle: this.toDoObj.tittle.textContent, childs: this.toDoObj.childs});
+            mainTasks.push({tittle: this.toDoObj.tittle, parent: this.toDoObj.parent, lastChild: this.toDoObj.lastChild, childs: this.toDoObj.childs});
+
             console.log(mainTasks);
 
             this.inputing.input.value = "";
             this.field.style.display = "none";
 
-            main.jsonize()
+            localStorage.setItem("data", JSON.stringify(toJson));
 
             this.toDoObj.lastChild.addEventListener("click", (e) => {
                 this.calledInput.style.display = "flex";
@@ -79,8 +84,16 @@ class main{
         this.inputing.button1.addEventListener("click", () => {
             const inputText = document.querySelector(".f1 > .inputField.card > label > input");
             const timeInput = document.querySelectorAll(".timeInput > *");
+            const impInput =  document.querySelector(".impInp > label input:checked").classList;
+
             if(!inputText.value || !timeInput[0].value || !timeInput[1].value) return;
-            DOMinate.taskCreator(inputText.value, timeInput[0].value, timeInput[1].value, this.pushed);
+
+            const toDoTask = DOMinate.taskToDo(inputText.value, "", this.pushed, impInput, timeInput[0].value, timeInput[1].value);
+            DOMinate.taskNav(inputText.value, this.pushed, toDoTask.class);
+
+            mainTasks[toDoTask.nums].childs.push(toDoTask.child);
+            toJson[toDoTask.nums].childs = [...mainTasks[toDoTask.nums].childs];
+            localStorage.setItem("data", JSON.stringify(toJson));
             this.remove()
         });
         this.inputing.img1.addEventListener("click", () => {
@@ -99,14 +112,17 @@ class main{
     };
 
 
-    static giveClass(ul, value, place) {
-        let check = false;
-        let num = "";
-        place.forEach(el => {
-            if(value == el.parent.classList) check = true;
-        });
-        if (check) num = Math.round(Math.random() * 56);
-        ul.classList = `${value}${num}`;
+    static giveClass(ul, place, name="main") {
+        try {
+            const n = place.at(-1).parent.classList[0].at(-1);
+            if (n == place.length) {
+                ul.classList = `${name}${+n + 1}`;
+                return;
+            }
+            ul.classList = `${name}${place.length}`;
+        } catch{
+            ul.classList = `${name}${place.length}`;
+        }
     }
 
     static separator(hourTime, monthTime) {
@@ -114,24 +130,20 @@ class main{
         monthTime = monthTime.split("-");
         return {hourTime, monthTime};
     }
-
-    static jsonize() {
-        localStorage.setItem("data", JSON.stringify(toJson));
-    }
 }
 
 
 
 class DOMinate {
-    static DOMNavEdit(value, first = false, cls) {
+    static DOMNavEdit(value) {
         const customProj = document.querySelector(".custom");
         const newGroup = document.createElement("ul");
         const para = document.createElement("p");
         para.textContent = value;
-        !first ? main.giveClass(newGroup, value, mainTasks) : newGroup.classList = cls;
+        main.giveClass(newGroup, mainTasks);
         newGroup.appendChild(para);
         customProj.appendChild(newGroup);
-        return {title: para, element: newGroup};
+        return {tittle: para, element: newGroup};
     }
 
     static DOMToDoEdit(text, value) {
@@ -150,62 +162,58 @@ class DOMinate {
         tasks.appendChild(task);
         task.appendChild(img);
         task.appendChild(document.createTextNode("Add task"));
-        mainTasks.push({title: para, parent: tasks, lastChild: task, amount: 0, childs:[]});
-        return {title: para, parent: tasks, lastChild: task, amount: 0, childs:[]};
+        return {tittle: para, parent: tasks, lastChild: task, childs:[]};
     }
 
-    static taskCreator(tittle, hourBased, monthBased, children) {
-        let nums;
-        const parent = children.parentNode;
-        const time = main.separator(hourBased, monthBased);
-        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        const impInput = document.querySelector(".impInp > label input:checked");
+    static taskNav(tittle, child, cls) {
+        const parent = child.parentNode;
         const li = document.createElement("li");
-        const date = new Date(time.monthTime[0], time.monthTime[1], time.monthTime[2], time.hourTime[0], time.hourTime[1]);
+        const nav = document.querySelector(`nav .${parent.classList}`);
+        li.textContent = tittle;
+        li.classList = cls;
+        nav.appendChild(li);
+    }
+
+    static taskToDo(tittle, date, child, importance, hourBased = "", monthBased = "") {
+        let nums;
+        const parent = child.parentNode;
+        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        if (date === "") {
+            const time = main.separator(hourBased, monthBased);
+            date = new Date(time.monthTime[0], time.monthTime[1], time.monthTime[2], time.hourTime[0], time.hourTime[1]);
+        }
+        const li = document.createElement("li");
         const input = document.createElement("input");
         const div = document.createElement("div");
         const para1 = document.createElement("p");
         const para2 = document.createElement("p");
+
         mainTasks.forEach(e => {
             e.parent.classList == parent.classList ? nums = mainTasks.indexOf(e) : console.log("uwi");
         })
-        const count = "td" + mainTasks[nums].amount;
-        const navLi = document.createElement("li");
-        navLi.textContent = tittle;
-        navLi.classList = count;
-        const nav = document.querySelector(`nav .${parent.classList}`);
-        nav.appendChild(navLi);
+
+        main.giveClass(li, mainTasks[nums].childs, "sub");
 
         para1.textContent = tittle;
-        para2.textContent = `${hourBased} ${daysOfWeek[date.getDay()]}`;
+        para2.textContent = `${date.getHours()}-${date.getMinutes()} ${daysOfWeek[date.getDay()]}`;
         para2.classList = "timeManage";
 
-        if (impInput.classList == "mid") {
-            input.classList = "medium";
-        } else if (impInput.classList == "imp") {
-            input.classList = "important";
+        if (importance == "mid") {
+            input.classList = "mid";
+        } else if (importance == "imp") {
+            input.classList = "imp";
         };
-
         input.type = "checkbox";
-        input.id = count;
-        div.classList = count;
 
-        li.appendChild(input);
-        li.appendChild(div);
         div.appendChild(para1);
         div.appendChild(para2);
 
-        parent.insertBefore(li, children);
-        mainTasks[nums].amount += 1;
-        mainTasks[nums].childs.push({name: tittle, date: date, importance: input.classList[0], id: input.id, checked: false});
+        li.appendChild(input);
+        li.appendChild(div);
 
-        toJson.push({
-            title: mainTasks[nums].title.textContent,
-            class: mainTasks[nums].parent.classList[0],
-            childs: mainTasks[nums].childs, 
-        })
+        parent.insertBefore(li, child);
 
-        main.jsonize();
+        return {nums, child: {name: tittle, date, importance: input.classList[0], checked: false}, class: li.classList[0]}
     }
 }
 

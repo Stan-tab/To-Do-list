@@ -271,28 +271,28 @@ input:hover{
     background-color: rgba(243, 243, 243, 0.733);
 }
 
-input.important{
+input.imp{
     background-color:rgba(248, 116, 116, 0.568);
     border-color: rgb(207, 4, 4);
 }
 
-input.important:hover{
+input.imp:hover{
     background-color: rgb(236, 138, 138);
 }
 
-input[type="checkbox"].important::before {
+input[type="checkbox"].imp::before {
     background-color: rgb(253, 14, 14);
 }
 
-input.medium{
+input.mid{
     background-color:rgba(252, 242, 168, 0.7);
     border-color: rgb(255, 224, 166);
 }
 
-input[type="checkbox"].medium::before {
+input[type="checkbox"].mid::before {
     background-color: rgb(223, 197, 80);
 }
 
-input.medium:hover{
+input.mid:hover{
     background-color: rgb(255, 242, 168);
 }
