@@ -4,6 +4,7 @@ const toJson = [];
 const mainTasks = [];
 
 class main{
+    count = 0;
     changable = {
         compl: document.querySelector(".completed"),
         today: document.querySelector(".today"),
@@ -15,6 +16,7 @@ class main{
         button: document.querySelector(".f2 button"),
         button1: document.querySelector(".f1 .apply"),
         img1: document.querySelector(".f1 > .inputField.card > img"),
+        sortImg: document.querySelector("header > img"),
     }
 
     inpCall = document.querySelector(".addGroup");
@@ -36,6 +38,7 @@ class main{
             e.childs.forEach(el => {
                 const toDoTask = DOMinate.taskToDo(el.name, new Date(el.date), mainTasks[data.indexOf(e)].lastChild, el.importance);
                 DOMinate.taskNav(el.name, mainTasks[data.indexOf(e)].lastChild, toDoTask.class);
+                toDoTask.child.childClass = toDoTask.class;
                 mainTasks[data.indexOf(e)].childs.push(toDoTask.child);
             })
         })
@@ -91,13 +94,37 @@ class main{
             const toDoTask = DOMinate.taskToDo(inputText.value, "", this.pushed, impInput, timeInput[0].value, timeInput[1].value);
             DOMinate.taskNav(inputText.value, this.pushed, toDoTask.class);
 
+            toDoTask.child.childClass = toDoTask.class;
             mainTasks[toDoTask.nums].childs.push(toDoTask.child);
-            toJson[toDoTask.nums].childs = [...mainTasks[toDoTask.nums].childs];
             localStorage.setItem("data", JSON.stringify(toJson));
             this.remove()
         });
         this.inputing.img1.addEventListener("click", () => {
             this.remove();
+        });
+
+        this.inputing.sortImg.addEventListener("click", ()  => {
+            mainTasks.forEach(e => {
+                const childs = this.childRemove(e.parent);
+                if (this.count % 2 == 0){
+                    var sorted = e.childs.toSorted((a,b) => a.date - b.date);
+                } else {
+                    var sorted = e.childs.toSorted((a,b) => {
+                        if(a.importance==b.importance) return 0;
+                        else if((a.importance=="imp" && (b.importance=="mid" || b.importance==undefined)) || (a.importance=="mid" && b.importance == undefined)) return -1;
+                        else if((b.importance=="imp" && (a.importance=="mid" || a.importance==undefined)) || (b.importance=="mid" && a.importance == undefined)) return 1;
+                    })
+                }
+
+                sorted.forEach(element => {
+                    childs.forEach(el => {
+                        if(element.childClass == el.classList) {
+                            DOMinate.childReAppend(el, e.parent, e.lastChild);
+                        };
+                    });
+                })
+            })
+            this.count += 1;
         })
     })()
 
@@ -110,6 +137,15 @@ class main{
         document.querySelector(".impInp > label input").checked = true;
         this.calledInput.style.display = "none";
     };
+
+    childRemove(parent) {
+        const childs = [];
+        while (parent.firstChild != parent.lastChild) {
+            childs.push(parent.firstChild);
+            parent.removeChild(parent.firstChild);
+        };
+        return childs;
+    }
 
 
     static giveClass(ul, place, name="main") {
@@ -174,6 +210,10 @@ class DOMinate {
         nav.appendChild(li);
     }
 
+    static childReAppend(child, parent, last) {
+        parent.insertBefore(child, last);
+    }
+
     static taskToDo(tittle, date, child, importance, hourBased = "", monthBased = "") {
         let nums;
         const parent = child.parentNode;
@@ -195,7 +235,7 @@ class DOMinate {
         main.giveClass(li, mainTasks[nums].childs, "sub");
 
         para1.textContent = tittle;
-        para2.textContent = `${date.getHours()}-${date.getMinutes()} ${daysOfWeek[date.getDay()]}`;
+        para2.textContent = `${date.getHours()}:${date.getMinutes()} ${daysOfWeek[date.getDay()]}`;
         para2.classList = "timeManage";
 
         if (importance == "mid") {
