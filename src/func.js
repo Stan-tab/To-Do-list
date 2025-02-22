@@ -38,7 +38,7 @@ class main{
         data.forEach(e => {
             if(e.childs==0) return;
             e.childs.forEach(el => {
-                const toDoTask = DOMinate.taskToDo(el.name, new Date(el.date), mainTasks[data.indexOf(e)].lastChild, el.importance);
+                const toDoTask = DOMinate.taskToDo(el.name, new Date(el.date), mainTasks[data.indexOf(e)].lastChild, el.importance, "", "", el.checked);
                 DOMinate.taskNav(el.name, mainTasks[data.indexOf(e)].lastChild, toDoTask.class);
                 toDoTask.child.childClass = toDoTask.class;
                 mainTasks[data.indexOf(e)].childs.push(toDoTask.child);
@@ -127,7 +127,8 @@ class main{
                 const childs = element.childs.map(a => {return {...a}});
                 this.childRemove(element.parent);
                 childs.forEach(e => {
-                    if(`${e.date.getFullYear()}-${e.date.getMonth()}-${e.date.getDay()}` == `${this.today.getFullYear()}-${this.today.getMonth()}-${this.today.getDay()}`) {
+                    if(`${e.date.getFullYear()}-${e.date.getMonth()}-${e.date.getDay()}` == `${this.today.getFullYear()}-${this.today.getMonth()}-${this.today.getDay()}`
+                        && !e.checked) {
                         DOMinate.childReAppend(e.childObj, element.parent, element.lastChild, "Today");
                     }
                 });
@@ -141,7 +142,23 @@ class main{
             mainTasks.forEach(element => {
                 this.childRemove(element.parent);
                 element.childs.forEach(e => {
-                    DOMinate.childReAppend(e.childObj, element.parent, element.lastChild, "All tasks");
+                    if(!e.checked) DOMinate.childReAppend(e.childObj, element.parent, element.lastChild, "All tasks");
+                });
+                this.count -= 1;
+                this.filter(element);
+                this.count += 1;
+            })
+        })
+
+        this.changable.compl.addEventListener("click", () => {
+            mainTasks.forEach(element => {
+                this.childRemove(element.parent);
+                const header = document.querySelector("header h1");
+                header.textContent = "Completed";
+                element.childs.forEach(e => {
+                    if(e.checked) {
+                        DOMinate.childReAppend(e.childObj, element.parent, element.lastChild);
+                    };
                 });
                 this.count -= 1;
                 this.filter(element);
@@ -209,6 +226,20 @@ class main{
         monthTime = monthTime.split("-");
         return {hourTime, monthTime};
     }
+
+    static listenerForTasks(element, num, cls) {
+        element.addEventListener("click", () => {
+            mainTasks[num].childs.forEach(e => {
+                if(e.childClass == cls) {
+                    mainTasks[num].childs[mainTasks[num].childs.indexOf(e)].checked = element.checked;
+                    toJson[num].childs[mainTasks[num].childs.indexOf(e)].checked = element.checked;
+                    localStorage.setItem("data", JSON.stringify(toJson));
+                    element.parentNode.parentNode.removeChild(element.parentNode);
+                    return;
+                }
+            })
+        })
+    }
 }
 
 
@@ -261,7 +292,7 @@ class DOMinate {
         parent.insertBefore(child, last);
     }
 
-    static taskToDo(tittle, date, child, importance, hourBased = "", monthBased = "") {
+    static taskToDo(tittle, date, child, importance, hourBased = "", monthBased = "", checked = false) {
         let nums;
         const parent = child.parentNode;
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -291,6 +322,7 @@ class DOMinate {
             input.classList = "imp";
         };
         input.type = "checkbox";
+        input.checked = checked;
 
         div.appendChild(para1);
         div.appendChild(para2);
@@ -298,9 +330,11 @@ class DOMinate {
         li.appendChild(input);
         li.appendChild(div);
 
-        parent.insertBefore(li, child);
+        if(!checked) parent.insertBefore(li, child);
 
-        return {nums, child: {name: tittle, date, importance: input.classList[0], checked: false, childObj: li}, class: li.classList[0]}
+        main.listenerForTasks(input, nums, li.classList[0]);
+
+        return {nums, child: {name: tittle, date, importance: input.classList[0], checked, childObj: li}, class: li.classList[0]}
     }
 }
 
