@@ -32,7 +32,7 @@ class main{
             const navVal = DOMinate.DOMNavEdit(e.tittle);
             const toDoObj = DOMinate.DOMToDoEdit(e.tittle, navVal.element.classList[0]);
 
-            toJson.push({tittle: toDoObj.tittle.textContent, childs: toDoObj.childs});
+            toJson.push({tittle: toDoObj.tittle.textContent, childs: []});
             mainTasks.push({tittle: toDoObj.tittle, parent: toDoObj.parent, lastChild: toDoObj.lastChild, childs: toDoObj.childs});
         });
         data.forEach(e => {
@@ -42,6 +42,11 @@ class main{
                 DOMinate.taskNav(el.name, mainTasks[data.indexOf(e)].lastChild, toDoTask.class);
                 toDoTask.child.childClass = toDoTask.class;
                 mainTasks[data.indexOf(e)].childs.push(toDoTask.child);
+                toJson[data.indexOf(e)].childs.push({name: toDoTask.child.name,
+                                               date: toDoTask.child.date,
+                                               importance: toDoTask.child.importance,
+                                               checked: toDoTask.child.checked,
+                })
             })
         })
     })();
@@ -70,7 +75,7 @@ class main{
             this.navObjs = DOMinate.DOMNavEdit(this.inputing.input.value);
             this.toDoObj = DOMinate.DOMToDoEdit(this.inputing.input.value, this.navObjs.element.classList);
 
-            toJson.push({tittle: this.toDoObj.tittle.textContent, childs: this.toDoObj.childs});
+            toJson.push({tittle: this.toDoObj.tittle.textContent, childs: []});
             mainTasks.push({tittle: this.toDoObj.tittle, parent: this.toDoObj.parent, lastChild: this.toDoObj.lastChild, childs: this.toDoObj.childs});
 
             console.log(mainTasks);
@@ -98,6 +103,11 @@ class main{
 
             toDoTask.child.childClass = toDoTask.class;
             mainTasks[toDoTask.nums].childs.push(toDoTask.child);
+            toJson[toDoTask.nums].childs.push({name: toDoTask.child.name,
+                                               date: toDoTask.child.date,
+                                               importance: toDoTask.child.importance,
+                                               checked: toDoTask.child.checked,
+            })
             localStorage.setItem("data", JSON.stringify(toJson));
             this.remove()
         });
@@ -107,41 +117,35 @@ class main{
 
         this.inputing.sortImg.addEventListener("click", ()  => {
             mainTasks.forEach(e => {
-                const childs = this.childRemove(e.parent);
-                if (this.count % 2 == 0){
-                    var sorted = e.childs.toSorted((a,b) => a.date - b.date);
-                } else {
-                    var sorted = e.childs.toSorted((a,b) => {
-                        if(a.importance==b.importance) return 0;
-                        else if((a.importance=="imp" && (b.importance=="mid" || b.importance==undefined)) || (a.importance=="mid" && b.importance == undefined)) return -1;
-                        else if((b.importance=="imp" && (a.importance=="mid" || a.importance==undefined)) || (b.importance=="mid" && a.importance == undefined)) return 1;
-                    })
-                }
-
-                sorted.forEach(element => {
-                    childs.forEach(el => {
-                        if(element.childClass == el.classList) {
-                            DOMinate.childReAppend(el, e.parent, e.lastChild);
-                        };
-                    });
-                })
+                this.filter(e);
             })
             this.count += 1;
         })
 
         this.changable.today.addEventListener("click", () => {
             mainTasks.forEach(element => {
-                const childs = element.childs;
+                const childs = element.childs.map(a => {return {...a}});
                 this.childRemove(element.parent);
-                DOMinate.reAppender(0, childs, element.lastChild, this.today);
+                childs.forEach(e => {
+                    if(`${e.date.getFullYear()}-${e.date.getMonth()}-${e.date.getDay()}` == `${this.today.getFullYear()}-${this.today.getMonth()}-${this.today.getDay()}`) {
+                        DOMinate.childReAppend(e.childObj, element.parent, element.lastChild, "Today");
+                    }
+                });
+                this.count -= 1;
+                this.filter(element);
+                this.count += 1;
             })
         })
 
         this.changable.all.addEventListener("click", () => {
             mainTasks.forEach(element => {
-                const childs = element.childs;
                 this.childRemove(element.parent);
-                DOMinate.reAppender(1, childs, element.lastChild);
+                element.childs.forEach(e => {
+                    DOMinate.childReAppend(e.childObj, element.parent, element.lastChild, "All tasks");
+                });
+                this.count -= 1;
+                this.filter(element);
+                this.count += 1;
             })
         })
     })()
@@ -163,6 +167,27 @@ class main{
             parent.removeChild(parent.firstChild);
         };
         return childs;
+    }
+
+    filter(obj) {
+        const childs = this.childRemove(obj.parent);
+        if (this.count % 2 == 0){
+            var sorted = obj.childs.toSorted((a,b) => a.date - b.date);
+        } else {
+            var sorted = obj.childs.toSorted((a,b) => {
+                if(a.importance==b.importance) return 0;
+                else if((a.importance=="imp" && (b.importance=="mid" || b.importance==undefined)) || (a.importance=="mid" && b.importance == undefined)) return -1;
+                else if((b.importance=="imp" && (a.importance=="mid" || a.importance==undefined)) || (b.importance=="mid" && a.importance == undefined)) return 1;
+            })
+        }
+
+        sorted.forEach(element => {
+            childs.forEach(el => {
+                if(element.childClass == el.classList) {
+                    DOMinate.childReAppend(el, obj.parent, obj.lastChild);
+                };
+            });
+        })
     }
 
 
@@ -228,7 +253,11 @@ class DOMinate {
         nav.appendChild(li);
     }
 
-    static childReAppend(child, parent, last) {
+    static childReAppend(child, parent, last, text = "") {
+        if(text != "") {
+            const header = document.querySelector("header h1");
+            header.textContent = text;
+        }
         parent.insertBefore(child, last);
     }
 
@@ -271,24 +300,7 @@ class DOMinate {
 
         parent.insertBefore(li, child);
 
-        return {nums, child: {name: tittle, date, importance: input.classList[0], checked: false}, class: li.classList[0]}
-    }
-
-    static reAppender(n, childs, lastChild, time="") {
-        const header = document.querySelector("header h1")
-        if (n == 0) {
-            header.textContent = "Today";
-            childs.forEach(e => {
-                if(`${e.date.getFullYear()}-${e.date.getMonth()}-${e.date.getDay()}` == `${time.getFullYear()}-${time.getMonth()}-${time.getDay()}`) {
-                    DOMinate.taskToDo(e.name, e.date, lastChild, e.importance);
-                }
-            })
-        } else if ( n==1 ) {
-            header.textContent = "All";
-            childs.forEach(e => {
-                DOMinate.taskToDo(e.name, e.date, lastChild, e.importance);
-            })
-        }
+        return {nums, child: {name: tittle, date, importance: input.classList[0], checked: false, childObj: li}, class: li.classList[0]}
     }
 }
 
