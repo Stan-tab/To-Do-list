@@ -4,11 +4,13 @@ const toJson = [];
 const mainTasks = [];
 
 class main{
+    today = new Date();
+
     count = 0;
     changable = {
         compl: document.querySelector(".completed"),
         today: document.querySelector(".today"),
-        compl: document.querySelector(".future"),
+        all: document.querySelector(".all"),
     };
     inputing = {
         input: document.querySelector(".f2 input"),
@@ -126,6 +128,22 @@ class main{
             })
             this.count += 1;
         })
+
+        this.changable.today.addEventListener("click", () => {
+            mainTasks.forEach(element => {
+                const childs = element.childs;
+                this.childRemove(element.parent);
+                DOMinate.reAppender(0, childs, element.lastChild, this.today);
+            })
+        })
+
+        this.changable.all.addEventListener("click", () => {
+            mainTasks.forEach(element => {
+                const childs = element.childs;
+                this.childRemove(element.parent);
+                DOMinate.reAppender(1, childs, element.lastChild);
+            })
+        })
     })()
 
 
@@ -220,7 +238,7 @@ class DOMinate {
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         if (date === "") {
             const time = main.separator(hourBased, monthBased);
-            date = new Date(time.monthTime[0], time.monthTime[1], time.monthTime[2], time.hourTime[0], time.hourTime[1]);
+            date = new Date(time.monthTime[0], (+time.monthTime[1] - 1), time.monthTime[2], time.hourTime[0], time.hourTime[1]);
         }
         const li = document.createElement("li");
         const input = document.createElement("input");
@@ -254,6 +272,23 @@ class DOMinate {
         parent.insertBefore(li, child);
 
         return {nums, child: {name: tittle, date, importance: input.classList[0], checked: false}, class: li.classList[0]}
+    }
+
+    static reAppender(n, childs, lastChild, time="") {
+        const header = document.querySelector("header h1")
+        if (n == 0) {
+            header.textContent = "Today";
+            childs.forEach(e => {
+                if(`${e.date.getFullYear()}-${e.date.getMonth()}-${e.date.getDay()}` == `${time.getFullYear()}-${time.getMonth()}-${time.getDay()}`) {
+                    DOMinate.taskToDo(e.name, e.date, lastChild, e.importance);
+                }
+            })
+        } else if ( n==1 ) {
+            header.textContent = "All";
+            childs.forEach(e => {
+                DOMinate.taskToDo(e.name, e.date, lastChild, e.importance);
+            })
+        }
     }
 }
 
