@@ -11,6 +11,7 @@ class main{
         compl: document.querySelector(".completed"),
         today: document.querySelector(".today"),
         all: document.querySelector(".all"),
+        navBar: document.querySelector("nav"),
     };
     inputing = {
         input: document.querySelector(".f2 input"),
@@ -18,7 +19,8 @@ class main{
         button: document.querySelector(".f2 button"),
         button1: document.querySelector(".f1 .apply"),
         img1: document.querySelector(".f1 > .inputField.card > img"),
-        sortImg: document.querySelector("header > img"),
+        sortImg: document.querySelector("header img[alt$=\"filter\"]"),
+        navAdd: document.querySelector("header img:first-child"),
     }
 
     inpCall = document.querySelector(".addGroup");
@@ -123,6 +125,8 @@ class main{
         })
 
         this.changable.today.addEventListener("click", () => {
+            const header = document.querySelector("header h1");
+            header.textContent = "Today";
             mainTasks.forEach(element => {
                 const childs = element.childs.map(a => {return {...a}});
                 this.childRemove(element.parent);
@@ -139,10 +143,12 @@ class main{
         })
 
         this.changable.all.addEventListener("click", () => {
+            const header = document.querySelector("header h1");
+            header.textContent = "All tasks";
             mainTasks.forEach(element => {
                 this.childRemove(element.parent);
                 element.childs.forEach(e => {
-                    if(!e.checked) DOMinate.childReAppend(e.childObj, element.parent, element.lastChild, "All tasks");
+                    if(!e.checked) DOMinate.childReAppend(e.childObj, element.parent, element.lastChild);
                 });
                 this.count -= 1;
                 this.filter(element);
@@ -151,10 +157,10 @@ class main{
         })
 
         this.changable.compl.addEventListener("click", () => {
+            const header = document.querySelector("header h1");
+            header.textContent = "Completed";
             mainTasks.forEach(element => {
                 this.childRemove(element.parent);
-                const header = document.querySelector("header h1");
-                header.textContent = "Completed";
                 element.childs.forEach(e => {
                     if(e.checked) {
                         DOMinate.childReAppend(e.childObj, element.parent, element.lastChild);
@@ -164,6 +170,14 @@ class main{
                 this.filter(element);
                 this.count += 1;
             })
+        })
+
+        this.inputing.navAdd.addEventListener("click", () => {
+            this.changable.navBar.style.display == "none" || this.changable.navBar.style.display == false ? this.changable.navBar.style.display = "block" : this.changable.navBar.style.display = "none";
+        })
+
+        window.addEventListener("resize", (e) => {
+            e.target.innerWidth > 720 ? this.changable.navBar.style.display = "block" : this.changable.navBar.style.display = "none";
         })
     })()
 
@@ -284,11 +298,7 @@ class DOMinate {
         nav.appendChild(li);
     }
 
-    static childReAppend(child, parent, last, text = "") {
-        if(text != "") {
-            const header = document.querySelector("header h1");
-            header.textContent = text;
-        }
+    static childReAppend(child, parent, last) {
         parent.insertBefore(child, last);
     }
 

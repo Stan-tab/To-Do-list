@@ -9,12 +9,31 @@ body {
     padding: 0;
 }
 
+header {
+    position: relative;
+}
+
 header img{
     margin-top: 1rem;
-    margin-left: 92%;
     width: 20px;
     height: 20px;
     padding: 5px;
+    display: inline-block;
+    position: relative;
+}
+
+header img:first-child{
+    left: 1vw;
+    width: 30px;
+    height: 30px;
+    display: none;
+}
+
+header img[alt$="filter"]{
+    position: absolute;
+    right: 0;
+    top: 3px;
+    margin: 0;
 }
 
 nav {
@@ -295,4 +314,20 @@ input[type="checkbox"].mid::before {
 
 input.mid:hover{
     background-color: rgb(255, 242, 168);
+}
+
+@media(max-width: 720px) {
+    nav {
+        display: none;
+    }
+    .custom{
+        display: none;
+    }
+    header img:first-child{
+        display: inline-block;
+    }
+    header img[alt$="filter"] {
+        top: 6px;
+        margin-top: 1rem;
+    }
 }
