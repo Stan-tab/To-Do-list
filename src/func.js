@@ -1,4 +1,5 @@
 import positive from "../assets/plus.svg"
+import del from "../assets/x.svg"
 
 const toJson = [];
 const mainTasks = [];
@@ -12,13 +13,13 @@ class main{
         today: document.querySelector(".today"),
         all: document.querySelector(".all"),
         navBar: document.querySelector("nav"),
+        deleteData: document.querySelector(".deletor"),
     };
     inputing = {
         input: document.querySelector(".f2 input"),
-        img: document.querySelector(".f2 img"),
+        img: [...document.querySelectorAll("img[alt$=\"exit\"]")],
         button: document.querySelector(".f2 button"),
         button1: document.querySelector(".f1 .apply"),
-        img1: document.querySelector(".f1 > .inputField.card > img"),
         sortImg: document.querySelector("header img[alt$=\"filter\"]"),
         navAdd: document.querySelector("header img:first-child"),
     }
@@ -40,7 +41,7 @@ class main{
         data.forEach(e => {
             if(e.childs==0) return;
             e.childs.forEach(el => {
-                const toDoTask = DOMinate.taskToDo(el.name, new Date(el.date), mainTasks[data.indexOf(e)].lastChild, el.importance, "", "", el.checked);
+                const toDoTask = DOMinate.taskToDo(el.name, new Date(el.date), mainTasks[data.indexOf(e)].lastChild, el.importance, el.defenition, "", "", el.checked);
                 DOMinate.taskNav(el.name, mainTasks[data.indexOf(e)].lastChild, toDoTask.class);
                 toDoTask.child.childClass = toDoTask.class;
                 mainTasks[data.indexOf(e)].childs.push(toDoTask.child);
@@ -48,6 +49,7 @@ class main{
                                                date: toDoTask.child.date,
                                                importance: toDoTask.child.importance,
                                                checked: toDoTask.child.checked,
+                                               defenition: toDoTask.child.defenition,
                 })
             })
         })
@@ -56,7 +58,7 @@ class main{
     addListeners = (() => {
         const toDos = document.querySelector(".todos");
         if (toDos.textContent == false) {
-            toDos.textContent = "Seems you are free now. Add some tasks"
+            toDos.textContent = "Seems you are free now. Add some tasks";
         } else {
             mainTasks.forEach(e => {
                 e.lastChild.addEventListener("click", (e) => {
@@ -67,10 +69,6 @@ class main{
         };
         this.inpCall.addEventListener("click", () => {
             this.field.style.display = "flex";
-        });
-        this.inputing.img.addEventListener("click", () => {
-            this.field.style.display = "none";
-            this.inputing.input.value = "";
         });
         this.inputing.button.addEventListener("click", () => {
             if (this.inputing.input.value == false) return;
@@ -97,10 +95,11 @@ class main{
             const inputText = document.querySelector(".f1 > .inputField.card > label > input");
             const timeInput = document.querySelectorAll(".timeInput > *");
             const impInput =  document.querySelector(".impInp > label input:checked").classList;
+            const textArea = document.querySelector(".textArea > textarea");
 
             if(!inputText.value || !timeInput[0].value || !timeInput[1].value) return;
 
-            const toDoTask = DOMinate.taskToDo(inputText.value, "", this.pushed, impInput, timeInput[0].value, timeInput[1].value);
+            const toDoTask = DOMinate.taskToDo(inputText.value, "", this.pushed, impInput, textArea.value, timeInput[0].value, timeInput[1].value);
             DOMinate.taskNav(inputText.value, this.pushed, toDoTask.class);
 
             toDoTask.child.childClass = toDoTask.class;
@@ -109,13 +108,16 @@ class main{
                                                date: toDoTask.child.date,
                                                importance: toDoTask.child.importance,
                                                checked: toDoTask.child.checked,
+                                               defenition: toDoTask.child.defenition,
             })
             localStorage.setItem("data", JSON.stringify(toJson));
             this.remove()
         });
-        this.inputing.img1.addEventListener("click", () => {
-            this.remove();
-        });
+        this.inputing.img.forEach(e => {
+            e.addEventListener("click", () => {
+                this.remove();
+            });
+        })
 
         this.inputing.sortImg.addEventListener("click", ()  => {
             mainTasks.forEach(e => {
@@ -179,16 +181,27 @@ class main{
         window.addEventListener("resize", (e) => {
             e.target.innerWidth > 720 ? this.changable.navBar.style.display = "block" : this.changable.navBar.style.display = "none";
         })
+
+        this.changable.deleteData.addEventListener("click", () => {
+            const navCustom = document.querySelector(".custom");
+            localStorage.clear();
+            toDos.textContent = "Seems you are free now. Add some tasks";
+            navCustom.textContent = "";
+        })
     })()
 
 
     remove() {
+        const description = document.querySelector(".f3");
         document.querySelector(".f1 > .inputField.card > label > input").value = "";
         [...document.querySelectorAll(".timeInput > *")].forEach(el => {
             el.value = "";
         });
+        this.inputing.input.value = "";
         document.querySelector(".impInp > label input").checked = true;
         this.calledInput.style.display = "none";
+        this.field.style.display = "none";
+        description.style.display = "none";
     };
 
     childRemove(parent) {
@@ -254,6 +267,33 @@ class main{
             })
         })
     }
+
+    static descriptionListener(element, tittle, time, definition) {
+        element.addEventListener("click", () => {
+            const description = document.querySelector(".f3");
+            const paras = [...document.querySelectorAll(".f3 > .card > p")];
+            description.style.display = "flex";
+            paras[0].textContent = tittle;
+            paras[1].textContent = time;
+            paras[2].textContent = definition;
+        })
+    }
+
+    static deleteListener(element, num, cls, child) {
+        element.addEventListener("click", () => {
+            mainTasks[num].childs.forEach(el => {
+                if(el.childClass == cls) {
+                    const navChild = document.querySelector(`.custom .${cls}`);
+
+                    mainTasks[num].childs.splice(mainTasks[num].childs.indexOf(el), 1);
+                    toJson[num].childs.splice(mainTasks[num].childs.indexOf(el), 1);
+                    child.parentNode.removeChild(child);
+                    navChild.parentNode.removeChild(navChild);
+                }
+            })
+            localStorage.setItem("data", JSON.stringify(toJson));
+        })
+    }
 }
 
 
@@ -302,7 +342,7 @@ class DOMinate {
         parent.insertBefore(child, last);
     }
 
-    static taskToDo(tittle, date, child, importance, hourBased = "", monthBased = "", checked = false) {
+    static taskToDo(tittle, date, child, importance, defenition, hourBased = "", monthBased = "", checked = false) {
         let nums;
         const parent = child.parentNode;
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -315,6 +355,7 @@ class DOMinate {
         const div = document.createElement("div");
         const para1 = document.createElement("p");
         const para2 = document.createElement("p");
+        const deletor = document.createElement("img");
 
         mainTasks.forEach(e => {
             e.parent.classList == parent.classList ? nums = mainTasks.indexOf(e) : console.log("uwi");
@@ -334,17 +375,22 @@ class DOMinate {
         input.type = "checkbox";
         input.checked = checked;
 
+        deletor.src = del;
+
         div.appendChild(para1);
         div.appendChild(para2);
 
         li.appendChild(input);
         li.appendChild(div);
+        li.appendChild(deletor);
 
         if(!checked) parent.insertBefore(li, child);
 
         main.listenerForTasks(input, nums, li.classList[0]);
+        main.descriptionListener(div, tittle, para2.textContent, defenition);
+        main.deleteListener(deletor, nums, li.classList[0], li);
 
-        return {nums, child: {name: tittle, date, importance: input.classList[0], checked, childObj: li}, class: li.classList[0]}
+        return {nums, child: {name: tittle, defenition, date, importance: input.classList[0], checked, childObj: li}, class: li.classList[0]}
     }
 }
 

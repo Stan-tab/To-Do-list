@@ -61,6 +61,11 @@ nav .base > li:hover{
     box-shadow: 1px 1px 2px hsl(0, 0%, 70%);
 }
 
+.deletor{
+    color: hsl(0, 100%, 55%);
+    margin-top: 1.5rem !important; 
+}
+
 .custom {
     margin-top: 10vh;
 }
@@ -102,6 +107,7 @@ ul {
     align-items: center;
     width: 100vw;
     height: 100vh;
+    z-index: 1;
 }
 
 .card{
@@ -221,14 +227,48 @@ ul {
     }
 }
 
+.textArea {
+    margin-bottom: 5px;
+}
+
+.textArea > textarea {
+    resize: none;
+    margin: 0 auto;
+    max-width: 215px;
+    border: 1px solid hsl(0, 0%, 70%);
+    border-radius: 5px;
+    display: block;
+    margin: 0 auto;
+}
+
 .f2 > .card > p{
     margin-top: 5px;
 }
 
 .f1,
-.f2 {
+.f2,
+.f3 {
     display: none;
 }
+
+.f3 > .card{
+    position: relative;
+    bottom: 15%;
+}
+
+.f3 > .card > p:first-child {
+    font-weight: bolder;
+    font-size: 1.3rem;
+    margin-bottom: -5px;
+}
+
+.f3 > .card > .timeManage {
+    margin-bottom: 5px;
+}
+
+.f3 > .card > p:last-child {
+    margin: 5px;
+} 
 
 div > p {
     margin: 0;
@@ -260,6 +300,12 @@ div .timeManage {
     gap: 0.2rem;
     border-top: 2px solid rgb(224, 222, 222);
     padding: 8px 0;
+    position: relative;
+}
+
+.todos li[class^="sub"] > img {
+    position: absolute;
+    right: 5px;
 }
 
 input[type="checkbox"] {
