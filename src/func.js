@@ -198,6 +198,7 @@ class main{
             el.value = "";
         });
         this.inputing.input.value = "";
+        document.querySelector(".textArea > textarea").value = "";
         document.querySelector(".impInp > label input").checked = true;
         this.calledInput.style.display = "none";
         this.field.style.display = "none";
@@ -285,8 +286,8 @@ class main{
                 if(el.childClass == cls) {
                     const navChild = document.querySelector(`.custom .${cls}`);
 
-                    mainTasks[num].childs.splice(mainTasks[num].childs.indexOf(el), 1);
                     toJson[num].childs.splice(mainTasks[num].childs.indexOf(el), 1);
+                    mainTasks[num].childs.splice(mainTasks[num].childs.indexOf(el), 1);
                     child.parentNode.removeChild(child);
                     navChild.parentNode.removeChild(navChild);
                 }
