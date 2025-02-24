@@ -24,11 +24,13 @@ class main{
         sortImg: document.querySelector("header img[alt$=\"filter\"]"),
         navAdd: document.querySelector("header img:first-child"),
         textArea: document.querySelector(".textArea > textarea"),
+        ulDeleteButtons: document.querySelectorAll(".f4 > .card button"),
     };
     static specialVars = {
         num: 0,
         paras: document.querySelectorAll("p[contenteditable$=\"true\"]"),
     };
+    static alerter = document.querySelector(".f4");
 
     inpCall = document.querySelector(".addGroup");
     field = document.querySelector(".f2");
@@ -77,8 +79,6 @@ class main{
 
             toJson.push({tittle: this.toDoObj.tittle.textContent, childs: []});
             mainTasks.push({tittle: this.toDoObj.tittle, parent: this.toDoObj.parent, lastChild: this.toDoObj.lastChild, childs: this.toDoObj.childs});
-
-            console.log(mainTasks);
 
             this.inputing.input.value = "";
             this.field.style.display = "none";
@@ -202,7 +202,29 @@ class main{
             para.textContent = main.specialVars.paras[0].textContent;
 
             localStorage.setItem("data", JSON.stringify(toJson));
-        })
+        });
+        this.inputing.ulDeleteButtons[0].addEventListener("click", () => {
+            const ulToDel = main.specialVars.paraToDel.nextSibling;
+            let ul;
+            
+            mainTasks.forEach(element => {
+                if(element.parent.classList == ulToDel.classList) ul = element;
+            });
+
+            toJson.splice(mainTasks.indexOf(ul), 1)
+            mainTasks.splice(mainTasks.indexOf(ul), 1)
+
+            toDos.removeChild(main.specialVars.paraToDel);
+            toDos.removeChild(ulToDel);
+            localStorage.setItem("data", JSON.stringify(toJson));
+
+
+            if(toDos.textContent == "") toDos.textContent = "Seems you are free now. Add some tasks";
+            this.remove();
+        });
+        this.inputing.ulDeleteButtons[1].addEventListener("click", () => {
+            this.remove();
+        });
     })()
 
 
@@ -218,6 +240,7 @@ class main{
         this.calledInput.style.display = "none";
         this.field.style.display = "none";
         description.style.display = "none";
+        main.alerter.style.display = "none";
     };
 
     childRemove(parent) {
@@ -332,6 +355,13 @@ class main{
         });
         mainTasks[num].childs.push(child);
     }
+
+    static deleteAlert(element) {
+        element.addEventListener("click", () => {
+            main.alerter.style.display = "flex";
+            main.specialVars.paraToDel = element;
+        });
+    }
 }
 
 
@@ -359,6 +389,7 @@ class DOMinate {
         tasks.classList = value;
         img.src = positive;
         img.alt = "positive";
+        main.deleteAlert(para);
         toDo.appendChild(para);
         toDo.appendChild(tasks);
         tasks.appendChild(task);

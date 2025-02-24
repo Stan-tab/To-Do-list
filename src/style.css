@@ -247,11 +247,13 @@ ul {
 
 .f1,
 .f2,
-.f3 {
+.f3,
+.f4 {
     display: none;
 }
 
-.f3 > .card{
+.f3 > .card, 
+.f4 > .card {
     position: relative;
     bottom: 15%;
 }
@@ -269,6 +271,21 @@ ul {
 .f3 > .card > p:last-child {
     margin: 5px;
 } 
+
+.f4 .card {
+    width: 185px;
+    padding: 5px 10px;
+}
+
+.f4 > .card > div {
+    display: flex;
+    justify-content: space-around;
+}
+
+.f4 > .card button {
+    padding: 5px 10px;
+    margin: 5px 0;
+}
 
 div > p {
     margin: 0;
