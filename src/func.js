@@ -205,6 +205,8 @@ class main{
         });
         this.inputing.ulDeleteButtons[0].addEventListener("click", () => {
             const ulToDel = main.specialVars.paraToDel.nextSibling;
+            const navUl = document.querySelector(`.custom .${ulToDel.classList[0]}`);
+            const custom = document.querySelector(".custom");
             let ul;
             
             mainTasks.forEach(element => {
@@ -216,6 +218,7 @@ class main{
 
             toDos.removeChild(main.specialVars.paraToDel);
             toDos.removeChild(ulToDel);
+            custom.removeChild(navUl);
             localStorage.setItem("data", JSON.stringify(toJson));
 
 
