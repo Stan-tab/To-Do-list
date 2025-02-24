@@ -18,11 +18,17 @@ class main{
     inputing = {
         input: document.querySelector(".f2 input"),
         img: [...document.querySelectorAll("img[alt$=\"exit\"]")],
+        specialExit: document.querySelector("img[alt$=\"specialExit\"]"),
         button: document.querySelector(".f2 button"),
         button1: document.querySelector(".f1 .apply"),
         sortImg: document.querySelector("header img[alt$=\"filter\"]"),
         navAdd: document.querySelector("header img:first-child"),
-    }
+        textArea: document.querySelector(".textArea > textarea"),
+    };
+    static specialVars = {
+        num: 0,
+        paras: document.querySelectorAll("p[contenteditable$=\"true\"]"),
+    };
 
     inpCall = document.querySelector(".addGroup");
     field = document.querySelector(".f2");
@@ -44,13 +50,7 @@ class main{
                 const toDoTask = DOMinate.taskToDo(el.name, new Date(el.date), mainTasks[data.indexOf(e)].lastChild, el.importance, el.defenition, "", "", el.checked);
                 DOMinate.taskNav(el.name, mainTasks[data.indexOf(e)].lastChild, toDoTask.class);
                 toDoTask.child.childClass = toDoTask.class;
-                mainTasks[data.indexOf(e)].childs.push(toDoTask.child);
-                toJson[data.indexOf(e)].childs.push({name: toDoTask.child.name,
-                                               date: toDoTask.child.date,
-                                               importance: toDoTask.child.importance,
-                                               checked: toDoTask.child.checked,
-                                               defenition: toDoTask.child.defenition,
-                })
+                main.sync(data.indexOf(e), toDoTask.child);
             })
         })
     })();
@@ -95,21 +95,14 @@ class main{
             const inputText = document.querySelector(".f1 > .inputField.card > label > input");
             const timeInput = document.querySelectorAll(".timeInput > *");
             const impInput =  document.querySelector(".impInp > label input:checked").classList;
-            const textArea = document.querySelector(".textArea > textarea");
 
             if(!inputText.value || !timeInput[0].value || !timeInput[1].value) return;
 
-            const toDoTask = DOMinate.taskToDo(inputText.value, "", this.pushed, impInput, textArea.value, timeInput[0].value, timeInput[1].value);
+            const toDoTask = DOMinate.taskToDo(inputText.value, "", this.pushed, impInput, this.inputing.textArea.value, timeInput[0].value, timeInput[1].value);
             DOMinate.taskNav(inputText.value, this.pushed, toDoTask.class);
 
             toDoTask.child.childClass = toDoTask.class;
-            mainTasks[toDoTask.nums].childs.push(toDoTask.child);
-            toJson[toDoTask.nums].childs.push({name: toDoTask.child.name,
-                                               date: toDoTask.child.date,
-                                               importance: toDoTask.child.importance,
-                                               checked: toDoTask.child.checked,
-                                               defenition: toDoTask.child.defenition,
-            })
+            main.sync(toDoTask.nums, toDoTask.child);
             localStorage.setItem("data", JSON.stringify(toJson));
             this.remove()
         });
@@ -188,6 +181,28 @@ class main{
             toDos.textContent = "Seems you are free now. Add some tasks";
             navCustom.textContent = "";
         })
+
+        this.inputing.specialExit.addEventListener("click", () => {
+            this.remove();
+            let child;
+            const para = main.specialVars.element.childNodes[0];
+            const li = para.parentNode.parentNode;
+            
+            mainTasks[main.specialVars.num].childs.forEach(element => {
+                if(element.childClass == li.classList) {
+                    child = element;   
+                };
+            });
+
+            toJson[main.specialVars.num].childs[mainTasks[main.specialVars.num].childs.indexOf(child)].name = main.specialVars.paras[0].textContent;
+            toJson[main.specialVars.num].childs[mainTasks[main.specialVars.num].childs.indexOf(child)].defenition = main.specialVars.paras[1].textContent;
+            child.name = main.specialVars.paras[0].textContent;
+            child.defenition = main.specialVars.paras[1].textContent;
+
+            para.textContent = main.specialVars.paras[0].textContent;
+
+            localStorage.setItem("data", JSON.stringify(toJson));
+        })
     })()
 
 
@@ -198,7 +213,7 @@ class main{
             el.value = "";
         });
         this.inputing.input.value = "";
-        document.querySelector(".textArea > textarea").value = "";
+        this.inputing.textArea.value = "";
         document.querySelector(".impInp > label input").checked = true;
         this.calledInput.style.display = "none";
         this.field.style.display = "none";
@@ -269,14 +284,26 @@ class main{
         })
     }
 
-    static descriptionListener(element, tittle, time, definition) {
+    static descriptionListener(element, nums, time) {
         element.addEventListener("click", () => {
             const description = document.querySelector(".f3");
             const paras = [...document.querySelectorAll(".f3 > .card > p")];
+            const li = element.parentNode;
+            let child;
             description.style.display = "flex";
-            paras[0].textContent = tittle;
+
+            mainTasks[nums].childs.forEach(element => {
+                if(element.childClass == li.classList) {
+                    child = element;   
+                };
+            });
+
+            paras[0].textContent = child.name;
             paras[1].textContent = time;
-            paras[2].textContent = definition;
+            paras[2].textContent = child.defenition;
+
+            main.specialVars.num = nums;
+            main.specialVars.element = element;
         })
     }
 
@@ -294,6 +321,16 @@ class main{
             })
             localStorage.setItem("data", JSON.stringify(toJson));
         })
+    }
+
+    static sync(num, child) {
+        toJson[num].childs.push({name: child.name,
+                                date: child.date,
+                                importance: child.importance,
+                                checked: child.checked,
+                                defenition: child.defenition,
+        });
+        mainTasks[num].childs.push(child);
     }
 }
 
@@ -388,7 +425,7 @@ class DOMinate {
         if(!checked) parent.insertBefore(li, child);
 
         main.listenerForTasks(input, nums, li.classList[0]);
-        main.descriptionListener(div, tittle, para2.textContent, defenition);
+        main.descriptionListener(div, nums, para2.textContent);
         main.deleteListener(deletor, nums, li.classList[0], li);
 
         return {nums, child: {name: tittle, defenition, date, importance: input.classList[0], checked, childObj: li}, class: li.classList[0]}
