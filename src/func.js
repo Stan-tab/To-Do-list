@@ -315,7 +315,7 @@ class main{
             const description = document.querySelector(".f3");
             const paras = [...document.querySelectorAll(".f3 > .card > p")];
             const li = element.parentNode;
-            let child;
+            let child, day, month;
             description.style.display = "flex";
 
             mainTasks[nums].childs.forEach(element => {
@@ -324,8 +324,11 @@ class main{
                 };
             });
 
+            child.date.getDate() < 10 ? day = `0${child.date.getDate()}` : day = `${child.date.getDate()}`;
+            child.date.getMonth() < 10 ? month = `0${child.date.getMonth() + 1}` : month = `${child.date.getMonth() + 1}`;
+
             paras[0].textContent = child.name;
-            paras[1].textContent = time;
+            paras[1].textContent = `${time}    ${day}/${month}`;
             paras[2].textContent = child.defenition;
 
             main.specialVars.num = nums;
@@ -416,6 +419,7 @@ class DOMinate {
 
     static taskToDo(tittle, date, child, importance, defenition, hourBased = "", monthBased = "", checked = false) {
         let nums;
+        let hours, minutes;
         const parent = child.parentNode;
         const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
         if (date === "") {
@@ -435,8 +439,11 @@ class DOMinate {
 
         main.giveClass(li, mainTasks[nums].childs, "sub");
 
+        date.getHours() < 10 ? hours = `0${date.getHours()}` : hours = `${date.getHours()}`;
+        date.getMinutes() < 10 ? minutes = `0${date.getMinutes()}` : minutes = `${date.getMinutes()}`;
+
         para1.textContent = tittle;
-        para2.textContent = `${date.getHours()}:${date.getMinutes()} ${daysOfWeek[date.getDay()]}`;
+        para2.textContent = `${hours}:${minutes} ${daysOfWeek[date.getDay()]}`;
         para2.classList = "timeManage";
 
         if (importance == "mid") {
